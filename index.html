@@ -3,135 +3,1258 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>國字小遊戲 - 完整版</title>
+  <title>國字小遊戲</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@700;900&display=swap" rel="stylesheet">
   <style>
-    :root { --bg-grid: #fce4ec; --border-blue: #b0c4de; --btn-blue: #6aa1d8; --btn-green: #38b2ac; --btn-red: #e53935; }
+    :root {
+      --bg-grid: #fce4ec;
+      --card-bg: #ffffff;
+      --main-blue: #7ba4cf;
+      --border-blue: #b0c4de;
+      --tab-card: #b8a7ea;
+      --tab-trace: #eeb375;
+      --tab-choice: #88ab9a;
+      --tab-write: #a1b8cc;
+      --btn-gray: #e2e8f0;
+      --btn-blue: #6aa1d8;
+      --btn-green: #38b2ac;
+      --btn-red: #e53935;
+      --btn-orange: #ed8936;
+      --zy-color: #c53030;
+    }
+
     * { box-sizing: border-box; }
-    body { font-family: "DFKai-SB", "標楷體", sans-serif; background-color: #f7fafc; margin: 0; padding: 10px; display: flex; justify-content: center; }
-    .main-wrapper { width: 100%; max-width: 960px; background: white; border: 4px solid var(--border-blue); border-radius: 20px; padding: 15px; }
-    .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 2px solid #eee; }
-    .icon-svg-btn { width: 36px; height: 36px; cursor: pointer; color: #7b8eab; }
+
+    body {
+      font-family: "DFKai-SB", "標楷體", sans-serif;
+      background-color: #f7fafc;
+      background-image: 
+        linear-gradient(var(--bg-grid) 1.5px, transparent 1.5px),
+        linear-gradient(90deg, var(--bg-grid) 1.5px, transparent 1.5px);
+      background-size: 24px 24px;
+      margin: 0; padding: 10px;
+      min-height: 100vh;
+      display: flex; justify-content: center; align-items: center;
+      user-select: none; touch-action: manipulation;
+    }
+
+    .main-wrapper {
+      width: 100%; max-width: 980px;
+      background: rgba(255, 255, 255, 0.98);
+      border: 4px solid var(--border-blue);
+      border-radius: 28px; padding: 15px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.06);
+      position: relative;
+    }
+
+    .top-header {
+      border: 3px solid var(--border-blue);
+      border-radius: 18px; padding: 8px 15px;
+      display: flex; justify-content: space-between; align-items: center;
+      background-color: #fff; margin-bottom: 12px;
+    }
+
+    .app-title { font-family: 'Zen Maru Gothic', cursive, sans-serif; font-size: 1.8rem; color: #637b9d; margin: 0; }
+    .user-info-badge { font-size: 1.1rem; font-weight: bold; color: #2b6cb0; background: #ebf8ff; padding: 4px 12px; border-radius: 12px; border: 1px solid #bee3f8; }
+
+    .header-icons { display: flex; gap: 14px; align-items: center; }
+    .icon-svg-btn {
+      width: 36px; height: 36px; cursor: pointer; color: #7b8eab;
+      display: flex; align-items: center; justify-content: center; transition: transform 0.15s;
+    }
+    .icon-svg-btn:hover { transform: scale(1.1); }
+    .icon-svg-btn svg { width: 30px; height: 30px; fill: currentColor; }
+
+    .content-area { display: flex; gap: 12px; position: relative; }
+    .game-card-container {
+      flex: 1; border: 3px solid var(--border-blue); border-radius: 20px; padding: 15px;
+      min-height: 460px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; background-color: #fff;
+      position: relative;
+    }
+
+    .side-tabs { display: flex; flex-direction: column; gap: 8px; justify-content: flex-end; align-items: flex-end; }
     
-    /* 需求 1：直式注音樣式 */
-    .zhuyin-container { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1; }
-    .zhuyin-char { font-size: 1.2rem; }
-    .tone-mark { font-size: 0.8rem; margin-top: -5px; }
+    .finish-submit-btn {
+      width: 65px; padding: 8px 4px; border-radius: 16px; border: none;
+      background: linear-gradient(135deg, #48bb78, #38b2ac); color: white;
+      font-family: "DFKai-SB", "標楷體", sans-serif; font-size: 0.95rem; font-weight: bold;
+      text-align: center; cursor: pointer; box-shadow: 0 4px 10px rgba(56,178,172,0.3);
+      margin-bottom: 6px; line-height: 1.2;
+    }
+    .finish-submit-btn:hover { transform: scale(1.05); }
+
+    .tab-btn {
+      width: 55px; height: 80px; border-radius: 25px 0 0 25px; border: none; color: white;
+      font-family: "DFKai-SB", "標楷體", sans-serif; font-size: 1.2rem; font-weight: bold;
+      writing-mode: vertical-rl; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0.85;
+    }
+    .tab-btn.active { width: 65px; opacity: 1; box-shadow: -4px 0 10px rgba(0,0,0,0.1); }
+    .tab-btn.disabled { display: none !important; }
+    .tab-card { background-color: var(--tab-card); }
+    .tab-trace { background-color: var(--tab-trace); }
+    .tab-choice { background-color: var(--tab-choice); }
+    .tab-write { background-color: var(--tab-write); }
+
+    .btn-kai {
+      font-family: "DFKai-SB", "標楷體", sans-serif; font-size: 1rem; padding: 6px 14px;
+      border-radius: 10px; border: none; cursor: pointer; box-shadow: 0 3px 6px rgba(0,0,0,0.08);
+      display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+    }
+    .btn-kai.sm { font-size: 0.85rem; padding: 4px 8px; border-radius: 6px; }
+    .btn-gray { background-color: var(--btn-gray); color: #334e68; }
+    .btn-blue { background-color: var(--btn-blue); color: white; }
+    .btn-green { background-color: var(--btn-green); color: white; }
+    .btn-orange { background-color: var(--btn-orange); color: white; }
+    .btn-red { background-color: var(--btn-red); color: white; }
+
+    .mode-panel { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; }
+
+    /* 注音直式排版元件 */
+    .ruby-box {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      vertical-align: middle;
+      margin: 0 4px;
+    }
+    .ruby-han {
+      line-height: 1;
+      font-family: "DFKai-SB", "標楷體", sans-serif;
+    }
+    .ruby-zy-col {
+      display: inline-flex;
+      position: relative;
+      margin-left: 2px;
+      line-height: 1;
+      align-items: center;
+    }
+    .ruby-zy-symbols {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-family: "DFKai-SB", "標楷體", sans-serif;
+      color: var(--zy-color);
+      line-height: 1.05;
+      font-size: 0.46em;
+    }
+    .ruby-zy-tone {
+      position: absolute;
+      color: var(--zy-color);
+      font-size: 0.42em;
+      line-height: 1;
+      font-family: "DFKai-SB", "標楷體", sans-serif;
+    }
+    .tone-top { top: -0.35em; left: 50%; transform: translateX(-50%); }
+    .tone-side { right: -0.55em; bottom: 0.05em; }
+
+    /* 字卡 3D 翻轉卡片效果 */
+    .flashcard-container {
+      width: 220px; height: 220px; perspective: 1000px; cursor: pointer; margin-bottom: 10px;
+    }
+    .flashcard {
+      width: 100%; height: 100%; position: relative; transform-style: preserve-3d;
+      transition: transform 0.6s; border: 3px solid var(--border-blue); border-radius: 20px;
+      background: #ffffff; box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+    }
+    .flashcard.flipped { transform: rotateY(180deg); }
+    .card-face {
+      position: absolute; width: 100%; height: 100%; backface-visibility: hidden;
+      display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 18px;
+    }
+    .card-front { font-size: 5rem; color: #2c3e50; }
+    .card-back { font-size: 3.5rem; color: #2b6cb0; transform: rotateY(180deg); background: #f0f8ff; }
+
+    .canvas-frame {
+      width: 280px; height: 280px; max-width: 60vw; max-height: 60vw;
+      border: 3px solid var(--border-blue); border-radius: 20px;
+      background-color: #ffffff; position: relative; margin: 0 auto; touch-action: none;
+    }
+    canvas { width: 100%; height: 100%; border-radius: 18px; touch-action: none; cursor: crosshair; }
+
+    .control-bar { display: flex; gap: 8px; align-items: center; margin-top: 10px; flex-wrap: wrap; justify-content: center; }
+    .nav-question-bar { display: flex; gap: 6px; align-items: center; justify-content: center; margin-top: 10px; padding-top: 8px; border-top: 2px dashed #e2e8f0; width: 100%; flex-wrap: wrap; }
+    .q-btn { width: 34px; height: 34px; border-radius: 50%; border: 2px solid #cbd5e0; background: #edf2f7; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .q-btn.active { border-color: var(--main-blue); transform: scale(1.1); font-weight: 900; }
+    .q-btn.answered { background-color: #48bb78; color: white; border-color: #38a169; }
 
     .modal-mask { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; }
-    .modal-content { background: #fff; padding: 20px; border-radius: 20px; width: 90%; max-width: 800px; max-height: 85vh; overflow-y: auto; }
-    .btn-kai { padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; }
-    .editor-card-box { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 8px; }
+    .modal-content { background: #fff; padding: 20px; border-radius: 20px; width: 94%; max-width: 880px; max-height: 92vh; display: flex; flex-direction: column; border: 3px solid var(--border-blue); }
+    .modal-content.sm { max-width: 380px; text-align: center; }
+
+    .admin-nav { display: flex; gap: 8px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px; }
+    .admin-tab-btn { padding: 6px 12px; border-radius: 8px; border: none; background: #edf2f7; cursor: pointer; font-weight: bold; font-family: "DFKai-SB", "標楷體", sans-serif; }
+    .admin-tab-btn.active { background: var(--btn-blue); color: white; }
+    .admin-body { flex: 1; overflow-y: auto; padding-right: 4px; }
+
+    .admin-table { width: 100%; border-collapse: collapse; margin-bottom: 12px; }
+    .admin-table th, .admin-table td { border: 1px solid #e2e8f0; padding: 8px; text-align: center; }
+    .admin-table th { background: #f7fafc; }
+
+    .editor-card-box {
+      border: 1.5px solid #dce4ec; border-radius: 16px; padding: 14px; margin-bottom: 14px; background: #ffffff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .unit-tag {
+      display: inline-flex; align-items: center; gap: 4px; background: #f0f4f8;
+      border: 1px solid #cbd5e0; border-radius: 8px; padding: 4px 8px; margin: 3px;
+    }
+    .unit-tag input {
+      border: 1px solid #cbd5e0; border-radius: 6px; padding: 3px 6px; font-family: "DFKai-SB", "標楷體", sans-serif;
+    }
+
+    .locked-overlay {
+      position: absolute; top:0; left:0; width:100%; height:100%;
+      background: rgba(255,255,255,0.95); border-radius: 20px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 50; padding: 20px;
+    }
+
+    .question-display-banner {
+      display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 6px;
+      font-size: 2.2rem; min-height: 70px; margin-bottom: 15px;
+    }
+
+    .blank-slot {
+      display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
+      min-width: 60px; height: 60px; border: 2px dashed #4a5568; border-radius: 12px;
+      background: #edf2f7; padding: 4px 10px; margin: 0 4px;
+    }
+
+    @media (max-width: 600px) {
+      .app-title { font-size: 1.3rem; }
+      .tab-btn { width: 45px; height: 70px; font-size: 1rem; }
+      .tab-btn.active { width: 52px; }
+      .finish-submit-btn { width: 52px; font-size: 0.8rem; }
+      .canvas-frame { width: 220px; height: 220px; }
+      .flashcard-container { width: 170px; height: 170px; }
+      .question-display-banner { font-size: 1.6rem; }
+    }
   </style>
 </head>
 <body>
 
-<div class="main-wrapper">
-  <div class="top-header">
-    <h1 class="app-title">國字小遊戲</h1>
-    <div style="display:flex; gap:10px;">
-      <!-- 需求 3：新增重新整理按鈕 -->
-      <button onclick="location.reload()">重新整理</button>
-      <div class="icon-svg-btn" onclick="openModal('teacherAuthModal')" title="管理員登入">⚙️</div>
-    </div>
-  </div>
-</div>
-
-<!-- 後台管理 Modal -->
-<div class="modal-mask" id="adminModal">
-  <div class="modal-content">
-    <h2>圖形化題庫編輯器</h2>
-    <div id="adminTab1">
-      <div id="choiceEditorList"></div>
-      <button onclick="addChoiceItem()">+ 新增選字題目</button>
-      <hr>
-      <!-- 需求 2：題庫匯出入 -->
-      <button onclick="exportJSON()">匯出 JSON</button>
-      <input type="file" id="importFile" onchange="importJSON(event)">
-      <button onclick="document.getElementById('importFile').click()">匯入 JSON</button>
-    </div>
-
-    <!-- 需求 6：發布鎖定設定 -->
-    <div id="adminTab4" style="margin-top:20px; border-top:1px solid #ccc; padding-top:10px;">
-      <label>
-        <input type="checkbox" id="keepLockCheckbox"> 只發布不解除學生鎖定
-      </label>
-      <button onclick="submitBatchAssign()" class="btn-kai" style="background:var(--btn-blue); color:white;">確定發布</button>
-    </div>
-  </div>
-</div>
-
-<script>
-  let DB = { choice: [] };
-
-  // 需求 4：Enter 登入 (簡化版)
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      const pwdInput = document.querySelector('input[type="password"]');
-      if (document.activeElement === pwdInput) handleTeacherAuth();
-    }
-  });
-
-  // 需求 5：Tab 跳格與 Enter 新增 (於編輯器中)
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Tab' && document.getElementById('adminModal').style.display === 'flex') {
-      // 簡單實作：自動聚焦下一個輸入框
-      const inputs = document.querySelectorAll('input');
-      const index = Array.from(inputs).indexOf(document.activeElement);
-      if (index > -1 && inputs[index + 1]) inputs[index + 1].focus();
-    }
-  });
-
-  function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-  function handleTeacherAuth() { openModal('adminModal'); }
-
-  // 需求 2：匯出入 JSON
-  function exportJSON() {
-    const blob = new Blob([JSON.stringify(DB)], {type: "application/json"});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url; a.download = "quiz.json"; a.click();
-  }
-
-  function importJSON(event) {
-    const reader = new FileReader();
-    reader.onload = (e) => { DB = JSON.parse(e.target.result); renderEditor(); };
-    reader.readAsText(event.target.files[0]);
-  }
-
-  // 需求 1：直式注音渲染範例 (字串轉換為 HTML)
-  // 將注音字串（如 "ㄧˊ"）轉換為直式容器
-  function renderZhuyin(text) {
-    if (!text) return "";
-    const char = text.substring(0, 1);
-    const tone = text.substring(1);
-    return `<div class="zhuyin-container">
-              <span class="zhuyin-char">${char}</span>
-              ${tone ? `<span class="tone-mark">${tone}</span>` : ''}
-            </div>`;
-  }
-
-  // 需求 6：發布邏輯整合
-  function submitBatchAssign() {
-    const keepLock = document.getElementById('keepLockCheckbox').checked;
-    console.log("發布中，鎖定狀態維持:", keepLock);
-    alert("題目已發布，鎖定狀態：" + (keepLock ? "維持鎖定" : "解除鎖定"));
-  }
-
-  function addChoiceItem() {
-    DB.choice.push({ prefix: "", suffix: "", zhuyin: "ㄧˊ" });
-    renderEditor();
-  }
-
-  function renderEditor() {
-    const list = document.getElementById('choiceEditorList');
-    list.innerHTML = DB.choice.map((item, idx) => `
-      <div class="editor-card-box">
-        題目 ${idx + 1}: <input value="${item.prefix}" placeholder="前綴">
-        ${renderZhuyin(item.zhuyin)}
-        <input value="${item.suffix}" placeholder="後綴">
+  <div class="main-wrapper">
+    <div class="top-header">
+      <h1 class="app-title">國字小遊戲</h1>
+      <div class="user-info-badge" id="studentBadge">未登入</div>
+      <div class="header-icons">
+        <div class="icon-svg-btn" onclick="openModal('loginModal')" title="學生登入">
+          <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+        </div>
+        <div class="icon-svg-btn" onclick="openModal('teacherAuthModal')" title="教職員/管理員登入">
+          <svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+        </div>
       </div>
-    `).join('');
-  }
-</script>
+    </div>
+
+    <div class="content-area">
+      <div class="game-card-container">
+        <!-- 未派發任務或鎖定遮罩 -->
+        <div class="locked-overlay" id="lockedOverlay" style="display:none;">
+          <h1 style="font-size:2.4rem; color:#e53935; margin-bottom:10px;" id="lockOverlayTitle">📢 教師尚未發派任務</h1>
+          <p style="font-size:1.2rem; color:#4a5568; text-align:center;" id="lockOverlayMsg">請等待老師派發題目或開啟權限後再進行作答。</p>
+        </div>
+
+        <!-- 模式 1：字卡 (含直式注音) -->
+        <div id="mode1" class="mode-panel" style="display:none;">
+          <div class="flashcard-container" onclick="toggleCardFlip()">
+            <div class="flashcard" id="mainFlashcard">
+              <div class="card-face card-front" id="m1Front"></div>
+              <div class="card-face card-back" id="m1Back"></div>
+            </div>
+          </div>
+          <p style="color:#718096; font-size:0.95rem; margin:0;">💡 點擊卡片可翻看國字與注音</p>
+        </div>
+
+        <!-- 模式 2：習寫 -->
+        <div id="mode2" class="mode-panel" style="display:none;">
+          <div style="font-size:1.4rem; font-weight:bold; margin-bottom:8px; display:flex; align-items:center;" id="m2Title"></div>
+          <div class="canvas-frame">
+            <canvas id="traceCanvas"></canvas>
+          </div>
+          <div class="control-bar">
+            <button class="btn-kai btn-gray sm" onclick="clearCanvas('traceCanvas')">清除重寫</button>
+            <button class="btn-kai btn-blue sm" onclick="markAnswered()">完成此題</button>
+          </div>
+        </div>
+
+        <!-- 模式 3：選字 (支援多字前後綴直式注音) -->
+        <div id="mode3" class="mode-panel" style="display:none;">
+          <div class="question-display-banner" id="m3Title"></div>
+          <div id="m3Options" class="control-bar"></div>
+        </div>
+
+        <!-- 模式 4：寫詞 -->
+        <div id="mode4" class="mode-panel" style="display:none;">
+          <div class="question-display-banner" id="m4Title"></div>
+          <div class="canvas-frame">
+            <canvas id="writeCanvas"></canvas>
+          </div>
+          <div class="control-bar">
+            <button class="btn-kai btn-gray sm" onclick="clearCanvas('writeCanvas')">清除重寫</button>
+            <button class="btn-kai btn-blue sm" onclick="markAnswered()">完成此題</button>
+            <button class="btn-kai btn-orange sm" id="m4HintBtn" style="display:none;" onclick="showWriteHint()">💡 提示</button>
+          </div>
+        </div>
+
+        <!-- 導覽控制區 -->
+        <div style="width: 100%;">
+          <div class="control-bar">
+            <button class="btn-kai btn-gray" id="btnPrev" onclick="prevQ()">上一題</button>
+            <button class="btn-kai btn-blue" id="btnNext" onclick="nextQ()">下一題</button>
+          </div>
+          <div class="nav-question-bar" id="qNavContainer"></div>
+        </div>
+      </div>
+
+      <!-- 側邊標籤頁籤 -->
+      <div class="side-tabs">
+        <button class="finish-submit-btn" onclick="checkAndSubmitAll()">全部作答完畢</button>
+        <button class="tab-btn tab-card active" id="tab1" onclick="switchMode(1)">字卡</button>
+        <button class="tab-btn tab-trace" id="tab2" onclick="switchMode(2)">習寫</button>
+        <button class="tab-btn tab-choice" id="tab3" onclick="switchMode(3)">選字</button>
+        <button class="tab-btn tab-write" id="tab4" onclick="switchMode(4)">寫詞</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 學生登入 Modal (按 Enter 可登入) -->
+  <div class="modal-mask" id="loginModal">
+    <div class="modal-content sm">
+      <h3>🎒 學生登入</h3>
+      <input type="password" id="loginStudentPwd" style="width:100%; font-size:1.1rem; padding:8px; margin-bottom:15px; text-align:center;" placeholder="請輸入學生密碼" onkeydown="if(event.key==='Enter') handleStudentLogin()">
+      <div style="display:flex; gap:10px; justify-content:center;">
+        <button class="btn-kai btn-gray" onclick="closeModal('loginModal')">取消</button>
+        <button class="btn-kai btn-blue" onclick="handleStudentLogin()">登入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 教職員登入 Modal (按 Enter 可登入) -->
+  <div class="modal-mask" id="teacherAuthModal">
+    <div class="modal-content sm">
+      <h3>🔒 教職員/管理員登入</h3>
+      <input type="text" id="teacherIdInput" style="width:100%; font-size:1.1rem; padding:6px; margin-bottom:8px;" placeholder="帳號 ID" onkeydown="if(event.key==='Enter') document.getElementById('teacherPwdInput').focus()">
+      <input type="password" id="teacherPwdInput" style="width:100%; font-size:1.1rem; padding:6px; margin-bottom:12px;" placeholder="密碼" onkeydown="if(event.key==='Enter') handleTeacherAuth()">
+      <div style="display:flex; gap:10px; justify-content:center;">
+        <button class="btn-kai btn-gray" onclick="closeModal('teacherAuthModal')">取消</button>
+        <button class="btn-kai btn-green" onclick="handleTeacherAuth()">登入</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 後台控制台與圖形化題庫編輯器 -->
+  <div class="modal-mask" id="adminModal">
+    <div class="modal-content">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h2 style="margin:0;" id="backendTitle">🛠️ 圖形化題庫編輯器</h2>
+        <div style="display:flex; gap:6px;">
+          <button class="btn-kai btn-blue sm" onclick="loadBackendData()" title="重新整理後台資料">🔄 重新整理</button>
+          <button class="btn-kai btn-gray sm" onclick="closeModal('adminModal')">✕ 關閉</button>
+        </div>
+      </div>
+      <div class="admin-nav">
+        <button class="admin-tab-btn active" onclick="switchAdminTab(1)">題庫編輯器</button>
+        <button class="admin-tab-btn" onclick="switchAdminTab(2)" id="studentTabNav">學生名單與權限</button>
+        <button class="admin-tab-btn" onclick="switchAdminTab(3)" id="teacherTabNav" style="display:none;">老師帳號設定</button>
+        <button class="admin-tab-btn" onclick="switchAdminTab(4)">發布題目</button>
+      </div>
+      <div class="admin-body">
+        
+        <!-- 頁籤 1：圖形化題庫編輯器 -->
+        <div id="adminTab1">
+          <!-- 題庫選擇與管理列 -->
+          <div style="background:#edf2f7; padding:8px 12px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <b>目前編輯題庫：</b>
+              <select id="bankSelector" onchange="changeEditingBank(this.value)" style="padding:4px 8px; font-size:0.95rem; border-radius:6px; font-family:'DFKai-SB', sans-serif;"></select>
+              <button class="btn-kai btn-blue sm" onclick="createNewBankPrompt()">+ 新增題庫</button>
+              <button class="btn-kai btn-red sm" onclick="deleteCurrentBank()">刪除題庫</button>
+            </div>
+            <div style="display:flex; gap:6px; align-items:center;">
+              <input type="text" id="editingBankName" placeholder="題庫名稱" style="padding:4px 8px; font-size:0.9rem; width:130px; border-radius:6px; border:1px solid #cbd5e0;">
+            </div>
+          </div>
+
+          <!-- 子頁籤按鈕 -->
+          <div style="display:flex; gap:6px; margin-bottom:12px;">
+            <button class="btn-kai btn-blue sm" id="editorSubTab1" onclick="switchEditorSubTab(1)">字卡/習寫題庫</button>
+            <button class="btn-kai btn-gray sm" id="editorSubTab2" onclick="switchEditorSubTab(2)">選字題庫</button>
+            <button class="btn-kai btn-gray sm" id="editorSubTab3" onclick="switchEditorSubTab(3)">寫詞題庫</button>
+          </div>
+
+          <!-- 子頁籤 1：字卡/習寫 -->
+          <div id="editorPanel1" class="editor-section">
+            <button class="btn-kai btn-blue sm" style="margin-bottom:8px;" onclick="addCharItem()">+ 新增字卡/習寫</button>
+            <table class="admin-table">
+              <thead><tr><th style="width:70px;">國字</th><th>注音 (例: ㄒㄧˇ、ㄧㄤˊ)</th><th style="width:80px;">操作</th></tr></thead>
+              <tbody id="charEditorTbody"></tbody>
+            </table>
+          </div>
+
+          <!-- 子頁籤 2：選字題庫 (對齊截圖樣式) -->
+          <div id="editorPanel2" class="editor-section" style="display:none;">
+            <button class="btn-kai btn-blue sm" style="margin-bottom:10px;" onclick="addChoiceItem()">+ 新增選字題目</button>
+            <div id="choiceEditorList"></div>
+          </div>
+
+          <!-- 子頁籤 3：寫詞題庫 (對齊截圖樣式) -->
+          <div id="editorPanel3" class="editor-section" style="display:none;">
+            <button class="btn-kai btn-blue sm" style="margin-bottom:10px;" onclick="addWriteItem()">+ 新增寫詞題目</button>
+            <div id="writeEditorList"></div>
+          </div>
+
+          <!-- 底部工具列：重置、匯出、匯入、儲存 -->
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; padding-top:12px; border-top:2px solid #e2e8f0; flex-wrap:wrap; gap:8px;">
+            <div style="display:flex; gap:8px;">
+              <button class="btn-kai btn-gray sm" onclick="resetDefaultBank()">🔄 重置預設題庫</button>
+              <button class="btn-kai btn-gray sm" onclick="exportBankJSON()">📥 匯出 JSON</button>
+              <button class="btn-kai btn-gray sm" onclick="document.getElementById('importFileInput').click()">📤 匯入 JSON</button>
+              <input type="file" id="importFileInput" accept=".json" style="display:none;" onchange="importBankJSON(event)">
+            </div>
+            <button class="btn-kai btn-green" onclick="saveCurrentEditingBank()">💾 儲存題庫至雲端</button>
+          </div>
+        </div>
+
+        <!-- 頁籤 2：學生名單與權限 -->
+        <div id="adminTab2" style="display:none;">
+          <div style="display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap;">
+            <input type="text" id="stuClass" placeholder="班級" style="width:80px; padding:4px;">
+            <input type="text" id="stuId" placeholder="學號" style="width:90px; padding:4px;">
+            <input type="text" id="stuName" placeholder="姓名" style="width:90px; padding:4px;">
+            <input type="text" id="stuPwd" placeholder="密碼" style="width:90px; padding:4px;">
+            <button class="btn-kai btn-green sm" onclick="saveStudent()">新增/修改學生</button>
+          </div>
+          <table class="admin-table">
+            <thead><tr><th>班級</th><th>學號</th><th>姓名</th><th>密碼</th><th>作答權限</th></tr></thead>
+            <tbody id="studentTableBody"></tbody>
+          </table>
+        </div>
+
+        <!-- 頁籤 3：老師帳號設定 -->
+        <div id="adminTab3" style="display:none;">
+          <div style="display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap;">
+            <input type="text" id="tId" placeholder="帳號" style="width:90px; padding:4px;">
+            <input type="text" id="tName" placeholder="姓名" style="width:90px; padding:4px;">
+            <input type="text" id="tPwd" placeholder="密碼" style="width:90px; padding:4px;">
+            <input type="text" id="tClass" placeholder="負責班級" style="width:90px; padding:4px;">
+            <button class="btn-kai btn-green sm" onclick="saveTeacher()">新增/修改老師</button>
+          </div>
+          <table class="admin-table">
+            <thead><tr><th>帳號</th><th>姓名</th><th>密碼</th><th>負責班級</th></tr></thead>
+            <tbody id="teacherTableBody"></tbody>
+          </table>
+        </div>
+
+        <!-- 頁籤 4：發布題目 (含鎖定控制核取方塊) -->
+        <div id="adminTab4" style="display:none;">
+          <div style="background:#f7fafc; padding:14px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:12px;">
+            <h4 style="margin:0 0 8px 0;">1. 選擇發布題庫與模式：</h4>
+            <div style="display:flex; gap:12px; margin-bottom:12px; flex-wrap:wrap; align-items:center;">
+              <select id="assignBankSelect" style="padding:5px 8px; font-size:1rem; font-family:'DFKai-SB', sans-serif; border-radius:6px;"></select>
+              <label><input type="checkbox" id="chkCard" checked> 字卡</label>
+              <label><input type="checkbox" id="chkTrace" checked> 習寫</label>
+              <label><input type="checkbox" id="chkChoice" checked> 選字</label>
+              <label><input type="checkbox" id="chkWrite" checked> 寫詞</label>
+            </div>
+
+            <h4 style="margin:8px 0 8px 0;">2. 選擇發布學生對象：
+              <button class="btn-kai btn-gray sm" onclick="toggleSelectAllStudents(true)">全選</button>
+              <button class="btn-kai btn-gray sm" onclick="toggleSelectAllStudents(false)">全不選</button>
+            </h4>
+            <div id="studentCheckboxContainer" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap:8px; max-height:180px; overflow-y:auto; background:#fff; padding:10px; border:1px solid #cbd5e0; border-radius:8px;"></div>
+            
+            <div style="margin-top:16px; padding:10px; background:#fff; border-radius:8px; border:1px solid #e2e8f0;">
+              <label style="font-weight:bold; font-size:1.05rem; cursor:pointer; display:inline-flex; align-items:center; gap:6px; color:#2d3748;">
+                <input type="checkbox" id="chkOnlyAssignKeepLock" style="width:18px; height:18px;">
+                只發布不解除學生鎖定 (若未勾選，發布時將自動解除選取學生之鎖定)
+              </label>
+            </div>
+
+            <button class="btn-kai btn-blue" style="margin-top:12px; width:100%; font-size:1.1rem; padding:10px;" onclick="submitBatchAssign()">🚀 確定發布題目</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyHU8-XjwlEw_Kg1y55hKm_ybMop9-nVS3n9q1OcDPoaonfG8n1EfmUZB_w_2ZQv0VFrA/exec";
+
+    // 預設題庫模板 (符合截圖格式)
+    const DEFAULT_TASK_DATA = {
+      chars: [
+        { char: "陽", zhuyin: "ㄧㄤˊ" },
+        { char: "山", zhuyin: "ㄕㄢ" },
+        { char: "高", zhuyin: "ㄍㄠ" }
+      ],
+      choice: [
+        {
+          prefixUnits: [{ char: "高", zhuyin: "ㄍㄠ" }],
+          suffixUnits: [],
+          zhuyin: "ㄕㄢ",
+          options: ["山", "出"],
+          answer: "山"
+        },
+        {
+          prefixUnits: [{ char: "太", zhuyin: "ㄊㄞˋ" }],
+          suffixUnits: [],
+          zhuyin: "ㄧㄤˊ",
+          options: ["陽", "楊"],
+          answer: "陽"
+        }
+      ],
+      write: [
+        {
+          prefixUnits: [{ char: "高", zhuyin: "ㄍㄠ" }],
+          suffixUnits: [],
+          answerChar: "山",
+          answerZhuyin: "ㄕㄢ",
+          allowHint: true
+        }
+      ]
+    };
+
+    let DB = JSON.parse(JSON.stringify(DEFAULT_TASK_DATA));
+    let currentStudent = null;
+    let currentUser = null;
+    let currentMode = 1, currentQIdx = 0;
+    let activeModes = ['card', 'trace', 'choice', 'write'];
+    let answeredState = { 1: {}, 2: {}, 3: {}, 4: {} };
+    let adminData = { banks: [], students: [], teachers: [], assigns: [] };
+    let isDrawing = false;
+    let currentSubTab = 2; // 預設選字題庫
+
+    function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+    function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+
+    function jsonpFetch(url, params, callback) {
+      const callbackName = 'jsonp_cb_' + Math.round(100000 * Math.random());
+      window[callbackName] = function(data) {
+        delete window[callbackName];
+        if (script.parentNode) script.parentNode.removeChild(script);
+        callback(data);
+      };
+      const queryParams = new URLSearchParams(params);
+      queryParams.append('callback', callbackName);
+      const script = document.createElement('script');
+      script.src = url + '?' + queryParams.toString();
+      document.body.appendChild(script);
+    }
+
+    function postAPI(body, callback) {
+      fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify(body) })
+        .then(res => res.json()).then(res => { if (callback) callback(res); })
+        .catch(err => { if (callback) callback({ status: 'error', message: err }); });
+    }
+
+    /* 需求 1：直式注音渲染解析器 (含韻母右上角聲調定位) */
+    function parseZhuyin(zyStr) {
+      if (!zyStr) return { symbols: [], tone: '', toneType: 'none' };
+      let tone = '';
+      let toneType = 'none';
+      let clean = String(zyStr).trim();
+
+      if (clean.includes('˙')) {
+        tone = '˙'; toneType = 'top'; clean = clean.replace(/˙/g, '');
+      } else if (clean.includes('ˊ')) {
+        tone = 'ˊ'; toneType = 'side'; clean = clean.replace(/ˊ/g, '');
+      } else if (clean.includes('ˇ')) {
+        tone = 'ˇ'; toneType = 'side'; clean = clean.replace(/ˇ/g, '');
+      } else if (clean.includes('ˋ')) {
+        tone = 'ˋ'; toneType = 'side'; clean = clean.replace(/ˋ/g, '');
+      }
+
+      const symbols = clean.split('');
+      return { symbols, tone, toneType };
+    }
+
+    function renderRubyHTML(char, zhuyin, fontSize = '2.4rem', charColor = '#2c3e50') {
+      const p = parseZhuyin(zhuyin);
+      const symHtml = p.symbols.map(s => `<span>${s}</span>`).join('');
+      let toneHtml = '';
+      if (p.tone) {
+        toneHtml = `<span class="ruby-zy-tone ${p.toneType === 'top' ? 'tone-top' : 'tone-side'}">${p.tone}</span>`;
+      }
+
+      return `
+        <span class="ruby-box" style="font-size:${fontSize};">
+          <span class="ruby-han" style="color:${charColor};">${char || ''}</span>
+          <span class="ruby-zy-col">
+            <span class="ruby-zy-symbols">${symHtml}</span>
+            ${toneHtml}
+          </span>
+        </span>
+      `;
+    }
+
+    function renderPureZhuyinHTML(zhuyin, fontSize = '1.8rem') {
+      const p = parseZhuyin(zhuyin);
+      const symHtml = p.symbols.map(s => `<span>${s}</span>`).join('');
+      let toneHtml = '';
+      if (p.tone) {
+        toneHtml = `<span class="ruby-zy-tone ${p.toneType === 'top' ? 'tone-top' : 'tone-side'}">${p.tone}</span>`;
+      }
+      return `
+        <span class="ruby-zy-col" style="font-size:${fontSize}; display:inline-flex;">
+          <span class="ruby-zy-symbols">${symHtml}</span>
+          ${toneHtml}
+        </span>
+      `;
+    }
+
+    function renderUnitListHTML(units, fontSize = '2.2rem') {
+      if (!units || units.length === 0) return '';
+      return units.map(u => renderRubyHTML(u.char, u.zhuyin, fontSize)).join('');
+    }
+
+    /* 學生端邏輯 */
+    function handleStudentLogin() {
+      const pwd = document.getElementById('loginStudentPwd').value.trim();
+      if (!pwd) return alert("請輸入密碼！");
+
+      jsonpFetch(GAS_API_URL, { action: 'studentLogin', password: pwd }, function(res) {
+        if (res.status === 'success') {
+          currentStudent = res.student;
+          document.getElementById('studentBadge').innerText = `${currentStudent.className} - ${currentStudent.name}`;
+          if (res.taskData && Object.keys(res.taskData).length > 0) DB = res.taskData;
+          if (res.assignModes) activeModes = res.assignModes;
+          
+          closeModal('loginModal');
+          document.getElementById('lockedOverlay').style.display = 'none';
+          updateTabVisibility();
+          const firstMode = getNextActiveMode(0);
+          if (firstMode) switchMode(firstMode);
+        } else if (res.status === 'no_task') {
+          currentStudent = res.student;
+          document.getElementById('studentBadge').innerText = `${currentStudent.className} - ${currentStudent.name}`;
+          closeModal('loginModal');
+          document.getElementById('lockedOverlay').style.display = 'flex';
+        } else {
+          alert(res.message || "密碼錯誤！");
+        }
+      });
+    }
+
+    function updateTabVisibility() {
+      const modeMap = { 1: 'card', 2: 'trace', 3: 'choice', 4: 'write' };
+      for (let i = 1; i <= 4; i++) {
+        const tabEl = document.getElementById(`tab${i}`);
+        if (activeModes.includes(modeMap[i])) {
+          tabEl.classList.remove('disabled');
+        } else {
+          tabEl.classList.add('disabled');
+        }
+      }
+    }
+
+    function getNextActiveMode(startMode) {
+      const modeMap = { 1: 'card', 2: 'trace', 3: 'choice', 4: 'write' };
+      for (let i = startMode + 1; i <= 4; i++) {
+        if (activeModes.includes(modeMap[i])) return i;
+      }
+      return null;
+    }
+
+    function switchMode(m) {
+      currentMode = m; currentQIdx = 0;
+      document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === m - 1));
+      renderQ();
+    }
+
+    function toggleCardFlip() {
+      document.getElementById('mainFlashcard').classList.toggle('flipped');
+    }
+
+    function renderQ() {
+      const card = document.getElementById('mainFlashcard');
+      if (card) card.classList.remove('flipped');
+
+      const list = currentMode <= 2 ? DB.chars : (currentMode === 3 ? DB.choice : DB.write);
+      document.querySelectorAll('.mode-panel').forEach((p, i) => p.style.display = i === currentMode - 1 ? 'flex' : 'none');
+
+      if (!list || list.length === 0) return;
+
+      if (currentMode === 1) {
+        const item = list[currentQIdx] || {};
+        document.getElementById('m1Front').innerHTML = renderRubyHTML(item.char || '', '', '5rem');
+        document.getElementById('m1Back').innerHTML = renderRubyHTML(item.char || '', item.zhuyin || '', '4.2rem', '#2b6cb0');
+      } else if (currentMode === 2) {
+        const item = list[currentQIdx] || {};
+        document.getElementById('m2Title').innerHTML = `請寫出國字： ${renderRubyHTML(item.char || '', item.zhuyin || '', '2.5rem')}`;
+        initCanvas('traceCanvas');
+      } else if (currentMode === 3) {
+        const item = list[currentQIdx];
+        const prefixHTML = renderUnitListHTML(item.prefixUnits || []);
+        const suffixHTML = renderUnitListHTML(item.suffixUnits || []);
+        const blankHTML = `<span class="blank-slot">${renderPureZhuyinHTML(item.zhuyin || '', '2.2rem')}</span>`;
+        document.getElementById('m3Title').innerHTML = `${prefixHTML} ${blankHTML} ${suffixHTML}`;
+
+        const optContainer = document.getElementById('m3Options');
+        optContainer.innerHTML = '';
+        (item.options || []).forEach(opt => {
+          optContainer.innerHTML += `<button class="btn-kai btn-blue" style="font-size:1.5rem; padding:10px 24px;" onclick="selectChoice('${opt}')">${opt}</button>`;
+        });
+      } else if (currentMode === 4) {
+        const item = list[currentQIdx];
+        const prefixHTML = renderUnitListHTML(item.prefixUnits || []);
+        const suffixHTML = renderUnitListHTML(item.suffixUnits || []);
+        const blankHTML = `<span class="blank-slot">${renderPureZhuyinHTML(item.answerZhuyin || '', '2.2rem')}</span>`;
+        document.getElementById('m4Title').innerHTML = `${prefixHTML} ${blankHTML} ${suffixHTML}`;
+        document.getElementById('m4HintBtn').style.display = item.allowHint ? 'inline-block' : 'none';
+        initCanvas('writeCanvas');
+      }
+
+      renderNavButtons(list.length);
+    }
+
+    function selectChoice(opt) {
+      const item = DB.choice[currentQIdx];
+      if (opt === item.answer) {
+        alert("答對了！🎉");
+        markAnswered();
+      } else { alert("再試一次看看喔！"); }
+    }
+
+    function showWriteHint() {
+      const item = DB.write[currentQIdx];
+      alert(`💡 提示答案：國字【${item.answerChar}】 注音【${item.answerZhuyin}】`);
+    }
+
+    function markAnswered() {
+      answeredState[currentMode][currentQIdx] = true;
+      renderQ();
+    }
+
+    function renderNavButtons(total) {
+      const container = document.getElementById('qNavContainer');
+      container.innerHTML = '';
+      for (let i = 0; i < total; i++) {
+        const isAns = answeredState[currentMode][i];
+        const isActive = i === currentQIdx;
+        container.innerHTML += `<button class="q-btn ${isActive ? 'active' : ''} ${isAns ? 'answered' : ''}" onclick="jumpToQ(${i})">${i + 1}</button>`;
+      }
+    }
+
+    function jumpToQ(idx) { currentQIdx = idx; renderQ(); }
+    function prevQ() { if (currentQIdx > 0) { currentQIdx--; renderQ(); } }
+    function nextQ() {
+      const list = currentMode <= 2 ? DB.chars : (currentMode === 3 ? DB.choice : DB.write);
+      if (currentQIdx < list.length - 1) { currentQIdx++; renderQ(); }
+    }
+
+    function checkAndSubmitAll() {
+      if (!currentStudent) return alert("請先登入！");
+
+      let hasUnfinished = false;
+      activeModes.forEach(mIdx => {
+        const modeNum = mIdx === 'card' ? 1 : (mIdx === 'trace' ? 2 : (mIdx === 'choice' ? 3 : 4));
+        const list = modeNum <= 2 ? DB.chars : (modeNum === 3 ? DB.choice : DB.write);
+        for (let i = 0; i < (list ? list.length : 0); i++) {
+          if (!answeredState[modeNum][i]) {
+            hasUnfinished = true; break;
+          }
+        }
+      });
+
+      if (hasUnfinished) {
+        if (!confirm("尚有題目未完成，確定要繳交嗎？")) return;
+      }
+
+      document.getElementById('lockOverlayTitle').innerText = "🎉 你真棒！";
+      document.getElementById('lockOverlayTitle').style.color = "#38b2ac";
+      document.getElementById('lockOverlayMsg').innerText = "作業已全部完成，請等待老師確認。";
+      document.getElementById('lockedOverlay').style.display = 'flex';
+
+      postAPI({ action: 'lockStudentSelf', studentId: currentStudent.id });
+    }
+
+    /* 手寫板 Canvas 繪圖功能 */
+    function initCanvas(canvasId) {
+      setTimeout(() => {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.strokeStyle = '#2c3e50';
+        ctx.lineWidth = 5;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+
+        function getPos(e) {
+          const cRect = canvas.getBoundingClientRect();
+          const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+          const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+          return { x: clientX - cRect.left, y: clientY - cRect.top };
+        }
+
+        canvas.onmousedown = canvas.ontouchstart = function(e) {
+          isDrawing = true;
+          const pos = getPos(e);
+          ctx.beginPath();
+          ctx.moveTo(pos.x, pos.y);
+        };
+        canvas.onmousemove = canvas.ontouchmove = function(e) {
+          if (!isDrawing) return;
+          const pos = getPos(e);
+          ctx.lineTo(pos.x, pos.y);
+          ctx.stroke();
+        };
+        canvas.onmouseup = canvas.ontouchend = function() { isDrawing = false; };
+      }, 100);
+    }
+
+    function clearCanvas(canvasId) {
+      const canvas = document.getElementById(canvasId);
+      if (canvas) {
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    /* 教職員管理後台 */
+    function handleTeacherAuth() {
+      const id = document.getElementById('teacherIdInput').value.trim();
+      const pwd = document.getElementById('teacherPwdInput').value.trim();
+      if (!id || !pwd) return alert("請輸入帳號與密碼！");
+
+      jsonpFetch(GAS_API_URL, { action: 'teacherLogin', id: id, password: pwd }, function(res) {
+        if (res.status === 'success') {
+          currentUser = { role: res.role, id: id, name: res.name || '管理員', managedClass: res.teacher ? res.teacher.managedClass : '全部' };
+          closeModal('teacherAuthModal');
+          loadBackendData();
+          openModal('adminModal');
+        } else { alert(res.message || "帳號或密碼錯誤！"); }
+      });
+    }
+
+    function loadBackendData() {
+      document.getElementById('backendTitle').innerText = currentUser.role === 'ADMIN' ? 
+        '🛠️ 圖形化題庫編輯器 (最高管理員)' : `🏫 ${currentUser.managedClass} - ${currentUser.name} 老師`;
+
+      document.getElementById('teacherTabNav').style.display = currentUser.role === 'ADMIN' ? 'inline-block' : 'none';
+
+      jsonpFetch(GAS_API_URL, { action: 'getBackendData', role: currentUser.role, managedClass: currentUser.managedClass }, function(res) {
+        if (res.status === 'success') {
+          adminData = res;
+          renderBankSelector();
+          renderStudentTable();
+          renderTeacherTable();
+          renderEditorTables();
+          renderAssignStudentCheckboxes();
+        }
+      });
+    }
+
+    function renderBankSelector() {
+      const bSel = document.getElementById('bankSelector');
+      const banks = adminData.banks || [];
+      if (banks.length === 0) {
+        banks.push({ name: "預設題庫", taskData: DB });
+        adminData.banks = banks;
+      }
+      bSel.innerHTML = banks.map(b => `<option value="${b.name}">${b.name}</option>`).join('');
+      const currentName = document.getElementById('editingBankName').value || banks[0].name;
+      bSel.value = currentName;
+      document.getElementById('editingBankName').value = bSel.value;
+    }
+
+    function changeEditingBank(bankName) {
+      const bank = (adminData.banks || []).find(b => b.name === bankName);
+      if (bank && bank.taskData) {
+        DB = typeof bank.taskData === 'string' ? JSON.parse(bank.taskData) : bank.taskData;
+        normalizeDBData();
+        document.getElementById('editingBankName').value = bank.name;
+        renderEditorTables();
+      }
+    }
+
+    function normalizeDBData() {
+      DB.chars = DB.chars || [];
+      DB.choice = DB.choice || [];
+      DB.write = DB.write || [];
+      // 容錯舊格式轉為包含多字注音單元格式
+      DB.choice.forEach(ch => {
+        if (!ch.prefixUnits && ch.prefix) ch.prefixUnits = [{ char: ch.prefix, zhuyin: "" }];
+        if (!ch.suffixUnits && ch.suffix) ch.suffixUnits = [{ char: ch.suffix, zhuyin: "" }];
+        ch.prefixUnits = ch.prefixUnits || [];
+        ch.suffixUnits = ch.suffixUnits || [];
+      });
+      DB.write.forEach(w => {
+        if (!w.prefixUnits && w.prefix) w.prefixUnits = [{ char: w.prefix, zhuyin: "" }];
+        if (!w.suffixUnits && w.suffix) w.suffixUnits = [{ char: w.suffix, zhuyin: "" }];
+        w.prefixUnits = w.prefixUnits || [];
+        w.suffixUnits = w.suffixUnits || [];
+      });
+    }
+
+    function createNewBankPrompt() {
+      const name = prompt("請輸入新題庫名稱：");
+      if (!name) return;
+      DB = JSON.parse(JSON.stringify(DEFAULT_TASK_DATA));
+      adminData.banks = adminData.banks || [];
+      adminData.banks.push({ name: name, taskData: DB });
+      renderBankSelector();
+      document.getElementById('bankSelector').value = name;
+      document.getElementById('editingBankName').value = name;
+      renderEditorTables();
+    }
+
+    function deleteCurrentBank() {
+      const currentName = document.getElementById('editingBankName').value;
+      if (!confirm(`確定要刪除題庫【${currentName}】嗎？`)) return;
+      postAPI({ action: 'deleteBank', bankName: currentName }, () => {
+        alert("題庫已刪除！");
+        loadBackendData();
+      });
+    }
+
+    function resetDefaultBank() {
+      if (confirm("確定要將當前題庫內容重置為預設題目嗎？")) {
+        DB = JSON.parse(JSON.stringify(DEFAULT_TASK_DATA));
+        renderEditorTables();
+      }
+    }
+
+    /* 需求 2：JSON 本機匯出與匯入 */
+    function exportBankJSON() {
+      const currentName = document.getElementById('editingBankName').value.trim() || '題庫';
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(DB, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `${currentName}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+    }
+
+    function importBankJSON(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          DB = imported;
+          normalizeDBData();
+          renderEditorTables();
+          alert("匯入成功！請點擊『儲存題庫』將題目同步儲存至雲端。");
+        } catch (err) {
+          alert("JSON 檔案格式錯誤，請確認檔案內容！");
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    function switchAdminTab(idx) {
+      document.querySelectorAll('.admin-tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx - 1));
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById(`adminTab${i}`).style.display = i === idx ? 'block' : 'none';
+      }
+    }
+
+    function switchEditorSubTab(subIdx) {
+      currentSubTab = subIdx;
+      for (let i = 1; i <= 3; i++) {
+        document.getElementById(`editorSubTab${i}`).className = `btn-kai ${i === subIdx ? 'btn-blue' : 'btn-gray'} sm`;
+        document.getElementById(`editorPanel${i}`).style.display = i === subIdx ? 'block' : 'none';
+      }
+    }
+
+    /* 需求 5：鍵盤快速鍵支援 (Enter 新增題目) */
+    function handleEditorKeydown(e, type) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (type === 'char') addCharItem();
+        else if (type === 'choice') addChoiceItem();
+        else if (type === 'write') addWriteItem();
+      }
+    }
+
+    /* 需求 1：圖形化題庫編輯器渲染 (完美對齊截圖樣式) */
+    function renderEditorTables() {
+      normalizeDBData();
+
+      // 1. 字卡 / 習寫
+      const cBody = document.getElementById('charEditorTbody');
+      cBody.innerHTML = '';
+      (DB.chars || []).forEach((c, idx) => {
+        cBody.innerHTML += `<tr>
+          <td><input type="text" value="${c.char || ''}" onchange="DB.chars[${idx}].char=this.value" onkeydown="handleEditorKeydown(event, 'char')" style="width:60px; text-align:center; font-size:1.1rem; padding:4px;"></td>
+          <td><input type="text" value="${c.zhuyin || ''}" onchange="DB.chars[${idx}].zhuyin=this.value" onkeydown="handleEditorKeydown(event, 'char')" placeholder="例如: ㄧㄤˊ" style="width:120px; text-align:center; font-size:1.1rem; padding:4px;"></td>
+          <td><button class="btn-kai btn-red sm" onclick="DB.chars.splice(${idx},1);renderEditorTables();">刪除</button></td>
+        </tr>`;
+      });
+
+      // 2. 選字題庫 (對齊圖 1 樣式)
+      const cList = document.getElementById('choiceEditorList');
+      cList.innerHTML = '';
+      (DB.choice || []).forEach((ch, idx) => {
+        let prefixUnitsHTML = (ch.prefixUnits || []).map((u, uIdx) => `
+          <span class="unit-tag">
+            字: <input type="text" value="${u.char || ''}" onchange="DB.choice[${idx}].prefixUnits[${uIdx}].char=this.value" onkeydown="handleEditorKeydown(event, 'choice')" style="width:36px; text-align:center;">
+            注音: <input type="text" value="${u.zhuyin || ''}" onchange="DB.choice[${idx}].prefixUnits[${uIdx}].zhuyin=this.value" onkeydown="handleEditorKeydown(event, 'choice')" style="width:65px; text-align:center;">
+            <button class="btn-kai btn-red sm" onclick="DB.choice[${idx}].prefixUnits.splice(${uIdx},1);renderEditorTables();" style="padding:2px 5px;">✕</button>
+          </span>
+        `).join('');
+
+        let suffixUnitsHTML = (ch.suffixUnits || []).map((u, uIdx) => `
+          <span class="unit-tag">
+            字: <input type="text" value="${u.char || ''}" onchange="DB.choice[${idx}].suffixUnits[${uIdx}].char=this.value" onkeydown="handleEditorKeydown(event, 'choice')" style="width:36px; text-align:center;">
+            注音: <input type="text" value="${u.zhuyin || ''}" onchange="DB.choice[${idx}].suffixUnits[${uIdx}].zhuyin=this.value" onkeydown="handleEditorKeydown(event, 'choice')" style="width:65px; text-align:center;">
+            <button class="btn-kai btn-red sm" onclick="DB.choice[${idx}].suffixUnits.splice(${uIdx},1);renderEditorTables();" style="padding:2px 5px;">✕</button>
+          </span>
+        `).join('');
+
+        let optionsHTML = (ch.options || []).map((opt, oIdx) => `
+          <span style="display:inline-flex; align-items:center; gap:2px; margin-right:6px;">
+            <input type="text" value="${opt}" onchange="DB.choice[${idx}].options[${oIdx}]=this.value; updateChoiceAnswerDropdown(${idx});" onkeydown="handleEditorKeydown(event, 'choice')" style="width:50px; text-align:center; font-size:1.1rem; padding:3px; border:1px solid #cbd5e0; border-radius:6px;">
+            <button class="btn-kai btn-red sm" onclick="DB.choice[${idx}].options.splice(${oIdx},1);renderEditorTables();" style="padding:2px 6px;">✕</button>
+          </span>
+        `).join('');
+
+        let answerOptions = (ch.options || []).map(opt => `<option value="${opt}" ${opt === ch.answer ? 'selected' : ''}>${opt}</option>`).join('');
+
+        cList.innerHTML += `
+          <div class="editor-card-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <b style="font-size:1.15rem; color:#2d3748;">題目 ${idx + 1}</b>
+              <button class="btn-kai btn-red sm" onclick="DB.choice.splice(${idx},1);renderEditorTables();">刪除此題</button>
+            </div>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:10px;">
+              <div>
+                <b>前綴詞句：</b>
+                <div>${prefixUnitsHTML}</div>
+                <button class="btn-kai btn-gray sm" style="margin-top:4px;" onclick="addUnit(DB.choice[${idx}].prefixUnits)">+ 新增前/後綴字</button>
+              </div>
+              <div>
+                <b>後綴詞句：</b>
+                <div>${suffixUnitsHTML}</div>
+                <button class="btn-kai btn-gray sm" style="margin-top:4px;" onclick="addUnit(DB.choice[${idx}].suffixUnits)">+ 新增前/後綴字</button>
+              </div>
+            </div>
+
+            <div style="margin-bottom:10px;">
+              <b>挖空處注音：</b>
+              <input type="text" value="${ch.zhuyin || ''}" onchange="DB.choice[${idx}].zhuyin=this.value" onkeydown="handleEditorKeydown(event, 'choice')" placeholder="例如: ㄕㄢ" style="width:130px; font-size:1.05rem; padding:4px 8px; border:1px solid #cbd5e0; border-radius:6px;">
+            </div>
+
+            <div style="margin-bottom:10px;">
+              <b>選項列表：</b>
+              ${optionsHTML}
+              <button class="btn-kai btn-gray sm" onclick="addChoiceOption(${idx})">+ 新增選項</button>
+            </div>
+
+            <div>
+              <b>正確答案：</b>
+              <select id="choiceAnsSel_${idx}" onchange="DB.choice[${idx}].answer=this.value" style="padding:4px 10px; font-size:1.05rem; border-radius:6px; font-family:'DFKai-SB', sans-serif;">
+                ${answerOptions}
+              </select>
+            </div>
+          </div>
+        `;
+      });
+
+      // 3. 寫詞題庫
+      const wList = document.getElementById('writeEditorList');
+      wList.innerHTML = '';
+      (DB.write || []).forEach((w, idx) => {
+        let prefixUnitsHTML = (w.prefixUnits || []).map((u, uIdx) => `
+          <span class="unit-tag">
+            字: <input type="text" value="${u.char || ''}" onchange="DB.write[${idx}].prefixUnits[${uIdx}].char=this.value" onkeydown="handleEditorKeydown(event, 'write')" style="width:36px; text-align:center;">
+            注音: <input type="text" value="${u.zhuyin || ''}" onchange="DB.write[${idx}].prefixUnits[${uIdx}].zhuyin=this.value" onkeydown="handleEditorKeydown(event, 'write')" style="width:65px; text-align:center;">
+            <button class="btn-kai btn-red sm" onclick="DB.write[${idx}].prefixUnits.splice(${uIdx},1);renderEditorTables();" style="padding:2px 5px;">✕</button>
+          </span>
+        `).join('');
+
+        let suffixUnitsHTML = (w.suffixUnits || []).map((u, uIdx) => `
+          <span class="unit-tag">
+            字: <input type="text" value="${u.char || ''}" onchange="DB.write[${idx}].suffixUnits[${uIdx}].char=this.value" onkeydown="handleEditorKeydown(event, 'write')" style="width:36px; text-align:center;">
+            注音: <input type="text" value="${u.zhuyin || ''}" onchange="DB.write[${idx}].suffixUnits[${uIdx}].zhuyin=this.value" onkeydown="handleEditorKeydown(event, 'write')" style="width:65px; text-align:center;">
+            <button class="btn-kai btn-red sm" onclick="DB.write[${idx}].suffixUnits.splice(${uIdx},1);renderEditorTables();" style="padding:2px 5px;">✕</button>
+          </span>
+        `).join('');
+
+        wList.innerHTML += `
+          <div class="editor-card-box">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+              <b style="font-size:1.15rem; color:#2d3748;">題目 ${idx + 1}</b>
+              <button class="btn-kai btn-red sm" onclick="DB.write.splice(${idx},1);renderEditorTables();">刪除此題</button>
+            </div>
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:10px;">
+              <div>
+                <b>前綴詞句：</b>
+                <div>${prefixUnitsHTML}</div>
+                <button class="btn-kai btn-gray sm" style="margin-top:4px;" onclick="addUnit(DB.write[${idx}].prefixUnits)">+ 新增前/後綴字</button>
+              </div>
+              <div>
+                <b>後綴詞句：</b>
+                <div>${suffixUnitsHTML}</div>
+                <button class="btn-kai btn-gray sm" style="margin-top:4px;" onclick="addUnit(DB.write[${idx}].suffixUnits)">+ 新增前/後綴字</button>
+              </div>
+            </div>
+
+            <div style="margin-bottom:10px; display:flex; gap:12px; align-items:center;">
+              <div>
+                <b>答案國字：</b>
+                <input type="text" value="${w.answerChar || ''}" onchange="DB.write[${idx}].answerChar=this.value" onkeydown="handleEditorKeydown(event, 'write')" style="width:60px; text-align:center; font-size:1.1rem; padding:4px;">
+              </div>
+              <div>
+                <b>答案注音：</b>
+                <input type="text" value="${w.answerZhuyin || ''}" onchange="DB.write[${idx}].answerZhuyin=this.value" onkeydown="handleEditorKeydown(event, 'write')" placeholder="例如: ㄕㄢ" style="width:110px; text-align:center; font-size:1.1rem; padding:4px;">
+              </div>
+            </div>
+
+            <div>
+              <label style="cursor:pointer;"><input type="checkbox" ${w.allowHint ? 'checked' : ''} onchange="DB.write[${idx}].allowHint=this.checked"> 允許學生使用提示按鈕 (💡)</label>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    function addUnit(unitArray) {
+      unitArray.push({ char: "新", zhuyin: "ㄒㄧㄣ" });
+      renderEditorTables();
+    }
+
+    function addCharItem() { DB.chars.push({ char: "陽", zhuyin: "ㄧㄤˊ" }); renderEditorTables(); }
+    function addChoiceItem() { DB.choice.push({ prefixUnits: [{ char: "太", zhuyin: "ㄊㄞˋ" }], suffixUnits: [], zhuyin: "ㄧㄤˊ", options: ["陽", "楊"], answer: "陽" }); renderEditorTables(); }
+    function addChoiceOption(cIdx) { DB.choice[cIdx].options.push("新"); renderEditorTables(); }
+    function addWriteItem() { DB.write.push({ prefixUnits: [{ char: "太", zhuyin: "ㄊㄞˋ" }], suffixUnits: [], answerChar: "陽", answerZhuyin: "ㄧㄤˊ", allowHint: true }); renderEditorTables(); }
+
+    function updateChoiceAnswerDropdown(cIdx) {
+      const ch = DB.choice[cIdx];
+      const sel = document.getElementById(`choiceAnsSel_${cIdx}`);
+      if (sel) {
+        sel.innerHTML = (ch.options || []).map(opt => `<option value="${opt}" ${opt === ch.answer ? 'selected' : ''}>${opt}</option>`).join('');
+        if (!ch.options.includes(ch.answer) && ch.options.length > 0) {
+          ch.answer = ch.options[0];
+          sel.value = ch.answer;
+        }
+      }
+    }
+
+    function saveCurrentEditingBank() {
+      const name = document.getElementById('editingBankName').value.trim();
+      if (!name) return alert("請輸入題庫名稱");
+      postAPI({ action: 'saveBank', bankName: name, taskData: DB, ownerID: currentUser.id, role: currentUser.role }, () => {
+        alert("題庫儲存成功！");
+        loadBackendData();
+      });
+    }
+
+    /* 學生名單與權限控制 */
+    function renderStudentTable() {
+      const sBody = document.getElementById('studentTableBody');
+      sBody.innerHTML = '';
+      (adminData.students || []).forEach(s => {
+        const assign = (adminData.assigns || []).find(a => String(a.targetId).trim() === String(s.id).trim());
+        const isLocked = assign ? String(assign.isLocked) === 'true' : false;
+
+        sBody.innerHTML += `<tr>
+          <td>${s.className}</td>
+          <td>${s.id}</td>
+          <td>${s.name}</td>
+          <td>${s.pwd}</td>
+          <td>
+            <button class="btn-kai ${isLocked ? 'btn-red' : 'btn-green'} sm" onclick="toggleStudentLock('${s.id}', ${!isLocked})">
+              ${isLocked ? '🔒 已鎖定 (不能作答)' : '🔓 已解鎖 (可以作答)'}
+            </button>
+          </td>
+        </tr>`;
+      });
+    }
+
+    function toggleStudentLock(studentId, setLocked) {
+      postAPI({ action: 'toggleLock', studentId: studentId, isLocked: setLocked }, () => {
+        loadBackendData();
+      });
+    }
+
+    function renderTeacherTable() {
+      if (currentUser.role !== 'ADMIN') return;
+      const tBody = document.getElementById('teacherTableBody');
+      tBody.innerHTML = '';
+      (adminData.teachers || []).forEach(t => {
+        tBody.innerHTML += `<tr><td>${t.id}</td><td>${t.name}</td><td>${t.pwd}</td><td>${t.managedClass}</td></tr>`;
+      });
+    }
+
+    /* 需求 6：發布題目選單與鎖定控制 */
+    function renderAssignStudentCheckboxes() {
+      const bSel = document.getElementById('assignBankSelect');
+      bSel.innerHTML = (adminData.banks || []).map(b => `<option value="${b.name}">${b.name}</option>`).join('');
+
+      const container = document.getElementById('studentCheckboxContainer');
+      container.innerHTML = '';
+      (adminData.students || []).forEach(s => {
+        container.innerHTML += `
+          <label style="display:flex; align-items:center; gap:6px; font-size:0.95rem; cursor:pointer;">
+            <input type="checkbox" class="stu-assign-chk" value="${s.id}">
+            ${s.className} - ${s.name}
+          </label>
+        `;
+      });
+    }
+
+    function toggleSelectAllStudents(selectAll) {
+      document.querySelectorAll('.stu-assign-chk').forEach(chk => chk.checked = selectAll);
+    }
+
+    function submitBatchAssign() {
+      const bankName = document.getElementById('assignBankSelect').value;
+      const selectedStudentIds = Array.from(document.querySelectorAll('.stu-assign-chk:checked')).map(chk => chk.value);
+
+      if (selectedStudentIds.length === 0) return alert("請至少勾選一位學生！");
+
+      const modes = [];
+      if (document.getElementById('chkCard').checked) modes.push('card');
+      if (document.getElementById('chkTrace').checked) modes.push('trace');
+      if (document.getElementById('chkChoice').checked) modes.push('choice');
+      if (document.getElementById('chkWrite').checked) modes.push('write');
+
+      const onlyAssignKeepLock = document.getElementById('chkOnlyAssignKeepLock').checked;
+
+      postAPI({
+        action: 'assignBatch',
+        bankName: bankName,
+        studentIds: selectedStudentIds,
+        modes: modes,
+        unlockStudents: !onlyAssignKeepLock // 勾選時不解除鎖定，未勾選時自動解鎖
+      }, () => {
+        alert(onlyAssignKeepLock ? "題目發布成功！已保留學生鎖定狀態。" : "題目發布成功！已自動解除選取學生之鎖定。");
+        loadBackendData();
+      });
+    }
+
+    function saveStudent() {
+      const className = document.getElementById('stuClass').value;
+      const studentId = document.getElementById('stuId').value;
+      const name = document.getElementById('stuName').value;
+      const pwd = document.getElementById('stuPwd').value;
+      postAPI({ action: 'saveStudent', className, studentId, name, pwd }, loadBackendData);
+    }
+
+    function saveTeacher() {
+      const teacherId = document.getElementById('tId').value;
+      const name = document.getElementById('tName').value;
+      const pwd = document.getElementById('tPwd').value;
+      const managedClass = document.getElementById('tClass').value;
+      postAPI({ action: 'saveTeacher', teacherId, name, pwd, managedClass }, loadBackendData);
+    }
+
+    switchMode(1);
+  </script>
 </body>
 </html>
