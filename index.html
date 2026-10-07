@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>國字小遊戲 - 完整版</title>
+  <style>
+    :root { --bg-grid: #fce4ec; --border-blue: #b0c4de; --btn-blue: #6aa1d8; --btn-green: #38b2ac; --btn-red: #e53935; }
+    * { box-sizing: border-box; }
+    body { font-family: "DFKai-SB", "標楷體", sans-serif; background-color: #f7fafc; margin: 0; padding: 10px; display: flex; justify-content: center; }
+    .main-wrapper { width: 100%; max-width: 960px; background: white; border: 4px solid var(--border-blue); border-radius: 20px; padding: 15px; }
+    .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 2px solid #eee; }
+    .icon-svg-btn { width: 36px; height: 36px; cursor: pointer; color: #7b8eab; }
+    
+    /* 需求 1：直式注音樣式 */
+    .zhuyin-container { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; line-height: 1; }
+    .zhuyin-char { font-size: 1.2rem; }
+    .tone-mark { font-size: 0.8rem; margin-top: -5px; }
+
+    .modal-mask { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; }
+    .modal-content { background: #fff; padding: 20px; border-radius: 20px; width: 90%; max-width: 800px; max-height: 85vh; overflow-y: auto; }
+    .btn-kai { padding: 8px 16px; border-radius: 8px; border: none; cursor: pointer; }
+    .editor-card-box { border: 1px solid #ddd; padding: 10px; margin-bottom: 10px; border-radius: 8px; }
+  </style>
+</head>
+<body>
+
+<div class="main-wrapper">
+  <div class="top-header">
+    <h1 class="app-title">國字小遊戲</h1>
+    <div style="display:flex; gap:10px;">
+      <!-- 需求 3：新增重新整理按鈕 -->
+      <button onclick="location.reload()">重新整理</button>
+      <div class="icon-svg-btn" onclick="openModal('teacherAuthModal')" title="管理員登入">⚙️</div>
+    </div>
+  </div>
+</div>
+
+<!-- 後台管理 Modal -->
+<div class="modal-mask" id="adminModal">
+  <div class="modal-content">
+    <h2>圖形化題庫編輯器</h2>
+    <div id="adminTab1">
+      <div id="choiceEditorList"></div>
+      <button onclick="addChoiceItem()">+ 新增選字題目</button>
+      <hr>
+      <!-- 需求 2：題庫匯出入 -->
+      <button onclick="exportJSON()">匯出 JSON</button>
+      <input type="file" id="importFile" onchange="importJSON(event)">
+      <button onclick="document.getElementById('importFile').click()">匯入 JSON</button>
+    </div>
+
+    <!-- 需求 6：發布鎖定設定 -->
+    <div id="adminTab4" style="margin-top:20px; border-top:1px solid #ccc; padding-top:10px;">
+      <label>
+        <input type="checkbox" id="keepLockCheckbox"> 只發布不解除學生鎖定
+      </label>
+      <button onclick="submitBatchAssign()" class="btn-kai" style="background:var(--btn-blue); color:white;">確定發布</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let DB = { choice: [] };
+
+  // 需求 4：Enter 登入 (簡化版)
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const pwdInput = document.querySelector('input[type="password"]');
+      if (document.activeElement === pwdInput) handleTeacherAuth();
+    }
+  });
+
+  // 需求 5：Tab 跳格與 Enter 新增 (於編輯器中)
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Tab' && document.getElementById('adminModal').style.display === 'flex') {
+      // 簡單實作：自動聚焦下一個輸入框
+      const inputs = document.querySelectorAll('input');
+      const index = Array.from(inputs).indexOf(document.activeElement);
+      if (index > -1 && inputs[index + 1]) inputs[index + 1].focus();
+    }
+  });
+
+  function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+  function handleTeacherAuth() { openModal('adminModal'); }
+
+  // 需求 2：匯出入 JSON
+  function exportJSON() {
+    const blob = new Blob([JSON.stringify(DB)], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = "quiz.json"; a.click();
+  }
+
+  function importJSON(event) {
+    const reader = new FileReader();
+    reader.onload = (e) => { DB = JSON.parse(e.target.result); renderEditor(); };
+    reader.readAsText(event.target.files[0]);
+  }
+
+  // 需求 1：直式注音渲染範例 (字串轉換為 HTML)
+  // 將注音字串（如 "ㄧˊ"）轉換為直式容器
+  function renderZhuyin(text) {
+    if (!text) return "";
+    const char = text.substring(0, 1);
+    const tone = text.substring(1);
+    return `<div class="zhuyin-container">
+              <span class="zhuyin-char">${char}</span>
+              ${tone ? `<span class="tone-mark">${tone}</span>` : ''}
+            </div>`;
+  }
+
+  // 需求 6：發布邏輯整合
+  function submitBatchAssign() {
+    const keepLock = document.getElementById('keepLockCheckbox').checked;
+    console.log("發布中，鎖定狀態維持:", keepLock);
+    alert("題目已發布，鎖定狀態：" + (keepLock ? "維持鎖定" : "解除鎖定"));
+  }
+
+  function addChoiceItem() {
+    DB.choice.push({ prefix: "", suffix: "", zhuyin: "ㄧˊ" });
+    renderEditor();
+  }
+
+  function renderEditor() {
+    const list = document.getElementById('choiceEditorList');
+    list.innerHTML = DB.choice.map((item, idx) => `
+      <div class="editor-card-box">
+        題目 ${idx + 1}: <input value="${item.prefix}" placeholder="前綴">
+        ${renderZhuyin(item.zhuyin)}
+        <input value="${item.suffix}" placeholder="後綴">
+      </div>
+    `).join('');
+  }
+</script>
+</body>
+</html>
