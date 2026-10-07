@@ -181,10 +181,10 @@
     .q-btn.answered { background-color: #48bb78; color: white; border-color: #38a169; }
 
     .modal-mask { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 100; }
-    .modal-content { background: #fff; padding: 20px; border-radius: 20px; width: 94%; max-width: 880px; max-height: 92vh; display: flex; flex-direction: column; border: 3px solid var(--border-blue); }
+    .modal-content { background: #fff; padding: 20px; border-radius: 20px; width: 94%; max-width: 900px; max-height: 92vh; display: flex; flex-direction: column; border: 3px solid var(--border-blue); }
     .modal-content.sm { max-width: 380px; text-align: center; }
 
-    .admin-nav { display: flex; gap: 8px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px; }
+    .admin-nav { display: flex; gap: 8px; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 12px; flex-wrap: wrap; }
     .admin-tab-btn { padding: 6px 12px; border-radius: 8px; border: none; background: #edf2f7; cursor: pointer; font-weight: bold; font-family: "DFKai-SB", "標楷體", sans-serif; }
     .admin-tab-btn.active { background: var(--btn-blue); color: white; }
     .admin-body { flex: 1; overflow-y: auto; padding-right: 4px; }
@@ -221,6 +221,37 @@
       display: inline-flex; flex-direction: column; align-items: center; justify-content: center;
       min-width: 60px; height: 60px; border: 2px dashed #4a5568; border-radius: 12px;
       background: #edf2f7; padding: 4px 10px; margin: 0 4px;
+    }
+
+    /* 成果檢視卡片樣式 */
+    .sub-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px;
+    }
+    .sub-card {
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 10px;
+      background: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    }
+    .sub-thumb {
+      width: 110px;
+      height: 110px;
+      border: 1px solid #cbd5e0;
+      border-radius: 8px;
+      background: #fff;
+      cursor: pointer;
+      object-fit: contain;
+      transition: transform 0.15s;
+    }
+    .sub-thumb:hover {
+      transform: scale(1.05);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     }
 
     @media (max-width: 600px) {
@@ -346,6 +377,17 @@
     </div>
   </div>
 
+  <!-- 筆跡大圖檢視 Modal -->
+  <div class="modal-mask" id="previewModal" style="z-index: 150;">
+    <div class="modal-content sm" style="max-width: 420px; align-items:center;">
+      <h3 id="previewTitle" style="margin:0 0 10px 0;">🔍 筆跡原檔檢視</h3>
+      <div style="width:280px; height:280px; border:2px solid var(--border-blue); border-radius:16px; background:#fff; display:flex; align-items:center; justify-content:center; margin-bottom:12px;">
+        <img id="previewImage" src="" style="width:100%; height:100%; object-fit:contain; border-radius:14px;">
+      </div>
+      <button class="btn-kai btn-blue" onclick="closeModal('previewModal')">關閉預覽</button>
+    </div>
+  </div>
+
   <!-- 後台控制台與圖形化題庫編輯器 -->
   <div class="modal-mask" id="adminModal">
     <div class="modal-content">
@@ -361,6 +403,7 @@
         <button class="admin-tab-btn" onclick="switchAdminTab(2)" id="studentTabNav">學生名單與權限</button>
         <button class="admin-tab-btn" onclick="switchAdminTab(3)" id="teacherTabNav" style="display:none;">老師帳號設定</button>
         <button class="admin-tab-btn" onclick="switchAdminTab(4)">發布題目</button>
+        <button class="admin-tab-btn" onclick="switchAdminTab(5)" style="background:#fed7d7; color:#9b2c2c;">📝 學生作業與筆跡檢視</button>
       </div>
       <div class="admin-body">
         
@@ -384,7 +427,6 @@
             <button class="btn-kai btn-gray sm" id="editorSubTab3" onclick="switchEditorSubTab(3)">寫詞題庫</button>
           </div>
 
-          <!-- 子頁籤 1：字卡/習寫 -->
           <div id="editorPanel1" class="editor-section">
             <button class="btn-kai btn-blue sm" style="margin-bottom:8px;" onclick="addCharItem()">+ 新增字卡/習寫</button>
             <table class="admin-table">
@@ -393,13 +435,11 @@
             </table>
           </div>
 
-          <!-- 子頁籤 2：選字題庫 -->
           <div id="editorPanel2" class="editor-section" style="display:none;">
             <button class="btn-kai btn-blue sm" style="margin-bottom:10px;" onclick="addChoiceItem()">+ 新增選字題目</button>
             <div id="choiceEditorList"></div>
           </div>
 
-          <!-- 子頁籤 3：寫詞題庫 -->
           <div id="editorPanel3" class="editor-section" style="display:none;">
             <button class="btn-kai btn-blue sm" style="margin-bottom:10px;" onclick="addWriteItem()">+ 新增寫詞題目</button>
             <div id="writeEditorList"></div>
@@ -475,6 +515,33 @@
           </div>
         </div>
 
+        <!-- 頁籤 5：學生作業與筆跡檢視 (新增功能) -->
+        <div id="adminTab5" style="display:none;">
+          <div style="background:#edf2f7; padding:10px 14px; border-radius:12px; margin-bottom:14px; display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+            <div>
+              <b>班級：</b>
+              <select id="subFilterClass" onchange="renderSubmissions()" style="padding:4px 8px; border-radius:6px; font-family:'DFKai-SB', sans-serif;">
+                <option value="ALL">全部班級</option>
+              </select>
+            </div>
+            <div>
+              <b>學生姓名：</b>
+              <select id="subFilterStudent" onchange="renderSubmissions()" style="padding:4px 8px; border-radius:6px; font-family:'DFKai-SB', sans-serif;">
+                <option value="ALL">全部學生</option>
+              </select>
+            </div>
+            <div>
+              <b>題庫：</b>
+              <select id="subFilterBank" onchange="renderSubmissions()" style="padding:4px 8px; border-radius:6px; font-family:'DFKai-SB', sans-serif;">
+                <option value="ALL">全部題庫</option>
+              </select>
+            </div>
+            <button class="btn-kai btn-blue sm" onclick="loadBackendData()">🔄 重新整理紀錄</button>
+          </div>
+
+          <div id="submissionsContainer" class="sub-grid"></div>
+        </div>
+
       </div>
     </div>
   </div>
@@ -523,7 +590,7 @@
     let activeModes = ['card', 'trace', 'choice', 'write'];
     let answeredState = { 1: {}, 2: {}, 3: {}, 4: {} };
     let drawingsState = { 2: {}, 4: {} };
-    let adminData = { banks: [], students: [], teachers: [], assigns: [] };
+    let adminData = { banks: [], students: [], teachers: [], assigns: [], submissions: [] };
     let isDrawing = false;
     let currentSubTab = 2;
 
@@ -622,7 +689,7 @@
       return units.map(u => renderRubyHTML(u.char, u.zhuyin, fontSize)).join('');
     }
 
-    /* 學生端邏輯 */
+    /* 學生端登入與作答 */
     function handleStudentLogin() {
       const pwd = document.getElementById('loginStudentPwd').value.trim();
       if (!pwd) return alert("請輸入密碼！");
@@ -741,7 +808,7 @@
     function autoSaveCurrentCanvas() {
       if (currentMode === 2) {
         const canvas = document.getElementById('traceCanvas');
-        if (canvas && canvas.getAttribute('data-drawn') === 'true') {
+        if (canvas) {
           const item = DB.chars[currentQIdx];
           drawingsState[2][currentQIdx] = {
             base64: canvas.toDataURL('image/png'),
@@ -752,7 +819,7 @@
         }
       } else if (currentMode === 4) {
         const canvas = document.getElementById('writeCanvas');
-        if (canvas && canvas.getAttribute('data-drawn') === 'true') {
+        if (canvas) {
           const item = DB.write[currentQIdx];
           drawingsState[4][currentQIdx] = {
             base64: canvas.toDataURL('image/png'),
@@ -822,6 +889,7 @@
         if (!confirm("尚有題目未完成，確定要繳交嗎？")) return;
       }
 
+      // 彙整所有手寫圖檔
       const allDrawings = [];
       [2, 4].forEach(m => {
         Object.keys(drawingsState[m]).forEach(qIdx => {
@@ -844,15 +912,9 @@
         bankName: currentBankName,
         drawings: allDrawings
       }, (res) => {
-        if (res && res.status === 'success') {
-          document.getElementById('lockOverlayTitle').innerText = "🎉 你真棒！";
-          document.getElementById('lockOverlayTitle').style.color = "#38b2ac";
-          document.getElementById('lockOverlayMsg').innerText = "作業已全部完成，手寫練習圖檔已成功寫入教師試算表！";
-        } else {
-          document.getElementById('lockOverlayTitle').innerText = "🎉 作業完成！";
-          document.getElementById('lockOverlayTitle').style.color = "#38b2ac";
-          document.getElementById('lockOverlayMsg').innerText = "作業已鎖定並送出完成狀態！";
-        }
+        document.getElementById('lockOverlayTitle').innerText = "🎉 你真棒！";
+        document.getElementById('lockOverlayTitle').style.color = "#38b2ac";
+        document.getElementById('lockOverlayMsg').innerText = "作業已全部完成，手寫練習圖檔已成功寫入教師試算表！";
       });
     }
 
@@ -873,6 +935,7 @@
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
 
+        // 若該題已有歷史畫布圖檔，自動載入還原
         const savedDrawing = drawingsState[currentMode] && drawingsState[currentMode][currentQIdx];
         if (savedDrawing && savedDrawing.base64) {
           const img = new Image();
@@ -880,9 +943,6 @@
             ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
           };
           img.src = savedDrawing.base64;
-          canvas.setAttribute('data-drawn', 'true');
-        } else {
-          canvas.setAttribute('data-drawn', 'false');
         }
 
         function getPos(e) {
@@ -894,7 +954,6 @@
 
         canvas.onmousedown = canvas.ontouchstart = function(e) {
           isDrawing = true;
-          canvas.setAttribute('data-drawn', 'true');
           const pos = getPos(e);
           ctx.beginPath();
           ctx.moveTo(pos.x, pos.y);
@@ -911,7 +970,7 @@
             autoSaveCurrentCanvas();
           }
         };
-      }, 100);
+      }, 50);
     }
 
     function clearCanvas(canvasId) {
@@ -920,7 +979,6 @@
         const ctx = canvas.getContext('2d');
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        canvas.setAttribute('data-drawn', 'false');
         if (drawingsState[currentMode]) {
           delete drawingsState[currentMode][currentQIdx];
         }
@@ -957,6 +1015,8 @@
           renderTeacherTable();
           renderEditorTables();
           renderAssignStudentCheckboxes();
+          initSubmissionFilters();
+          renderSubmissions();
         }
       });
     }
@@ -1062,9 +1122,11 @@
 
     function switchAdminTab(idx) {
       document.querySelectorAll('.admin-tab-btn').forEach((b, i) => b.classList.toggle('active', i === idx - 1));
-      for (let i = 1; i <= 4; i++) {
-        document.getElementById(`adminTab${i}`).style.display = i === idx ? 'block' : 'none';
+      for (let i = 1; i <= 5; i++) {
+        const el = document.getElementById(`adminTab${i}`);
+        if (el) el.style.display = i === idx ? 'block' : 'none';
       }
+      if (idx === 5) renderSubmissions();
     }
 
     function switchEditorSubTab(subIdx) {
@@ -1339,6 +1401,64 @@
         alert(onlyAssignKeepLock ? "題目發布成功！已保留學生鎖定狀態。" : "題目發布成功！已自動解除選取學生之鎖定。");
         loadBackendData();
       });
+    }
+
+    /* 需求 2：後台檢視學生作業與筆跡原檔檢視 */
+    function initSubmissionFilters() {
+      const subs = adminData.submissions || [];
+      const classSet = new Set(), stuSet = new Set(), bankSet = new Set();
+      subs.forEach(s => {
+        if (s.className) classSet.add(s.className);
+        if (s.studentName) stuSet.add(s.studentName);
+        if (s.bankName) bankSet.add(s.bankName);
+      });
+
+      const cSel = document.getElementById('subFilterClass');
+      cSel.innerHTML = '<option value="ALL">全部班級</option>' + Array.from(classSet).map(c => `<option value="${c}">${c}</option>`).join('');
+
+      const sSel = document.getElementById('subFilterStudent');
+      sSel.innerHTML = '<option value="ALL">全部學生</option>' + Array.from(stuSet).map(s => `<option value="${s}">${s}</option>`).join('');
+
+      const bSel = document.getElementById('subFilterBank');
+      bSel.innerHTML = '<option value="ALL">全部題庫</option>' + Array.from(bankSet).map(b => `<option value="${b}">${b}</option>`).join('');
+    }
+
+    function renderSubmissions() {
+      const container = document.getElementById('submissionsContainer');
+      const fClass = document.getElementById('subFilterClass').value;
+      const fStu = document.getElementById('subFilterStudent').value;
+      const fBank = document.getElementById('subFilterBank').value;
+
+      let list = adminData.submissions || [];
+      if (fClass !== 'ALL') list = list.filter(s => s.className === fClass);
+      if (fStu !== 'ALL') list = list.filter(s => s.studentName === fStu);
+      if (fBank !== 'ALL') list = list.filter(s => s.bankName === fBank);
+
+      if (list.length === 0) {
+        container.innerHTML = '<div style="grid-column:1/-1; text-align:center; color:#718096; padding:30px; font-size:1.1rem;">目前尚無符合條件的學生作答紀錄。</div>';
+        return;
+      }
+
+      container.innerHTML = list.map((item, idx) => {
+        const hasImg = item.base64 && item.base64.indexOf('data:image') !== -1;
+        return `
+          <div class="sub-card">
+            <div style="font-weight:bold; color:#2b6cb0; font-size:1rem; margin-bottom:4px;">${item.className} - ${item.studentName}</div>
+            <div style="font-size:0.85rem; color:#718096; margin-bottom:6px;">第 ${item.qIndex} 題：【${item.targetChar}】 (${item.modeName})</div>
+            ${hasImg ? 
+              `<img src="${item.base64}" class="sub-thumb" onclick="previewDrawing('${item.studentName} - ${item.targetChar}', '${item.base64}')" title="點擊放大檢視原圖">` : 
+              `<div style="width:110px; height:110px; background:#edf2f7; border-radius:8px; display:flex; align-items:center; justify-content:center; color:#a0aec0; font-size:0.85rem;">無手寫圖檔</div>`
+            }
+            <div style="font-size:0.75rem; color:#a0aec0; margin-top:6px;">${item.time}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function previewDrawing(title, base64) {
+      document.getElementById('previewTitle').innerText = `🔍 筆跡檢視：${title}`;
+      document.getElementById('previewImage').src = base64;
+      openModal('previewModal');
     }
 
     function saveStudent() {
