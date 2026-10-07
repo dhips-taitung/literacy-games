@@ -321,7 +321,7 @@
     </div>
   </div>
 
-  <!-- 學生登入 Modal (按 Enter 可登入) -->
+  <!-- 學生登入 Modal -->
   <div class="modal-mask" id="loginModal">
     <div class="modal-content sm">
       <h3>🎒 學生登入</h3>
@@ -333,7 +333,7 @@
     </div>
   </div>
 
-  <!-- 教職員登入 Modal (按 Enter 可登入) -->
+  <!-- 教職員登入 Modal -->
   <div class="modal-mask" id="teacherAuthModal">
     <div class="modal-content sm">
       <h3>🔒 教職員/管理員登入</h3>
@@ -366,7 +366,6 @@
         
         <!-- 頁籤 1：圖形化題庫編輯器 -->
         <div id="adminTab1">
-          <!-- 題庫選擇與管理列 -->
           <div style="background:#edf2f7; padding:8px 12px; border-radius:12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
             <div style="display:flex; align-items:center; gap:6px;">
               <b>目前編輯題庫：</b>
@@ -379,7 +378,6 @@
             </div>
           </div>
 
-          <!-- 子頁籤按鈕 -->
           <div style="display:flex; gap:6px; margin-bottom:12px;">
             <button class="btn-kai btn-blue sm" id="editorSubTab1" onclick="switchEditorSubTab(1)">字卡/習寫題庫</button>
             <button class="btn-kai btn-gray sm" id="editorSubTab2" onclick="switchEditorSubTab(2)">選字題庫</button>
@@ -395,19 +393,18 @@
             </table>
           </div>
 
-          <!-- 子頁籤 2：選字題庫 (對齊截圖樣式) -->
+          <!-- 子頁籤 2：選字題庫 -->
           <div id="editorPanel2" class="editor-section" style="display:none;">
             <button class="btn-kai btn-blue sm" style="margin-bottom:10px;" onclick="addChoiceItem()">+ 新增選字題目</button>
             <div id="choiceEditorList"></div>
           </div>
 
-          <!-- 子頁籤 3：寫詞題庫 (對齊截圖樣式) -->
+          <!-- 子頁籤 3：寫詞題庫 -->
           <div id="editorPanel3" class="editor-section" style="display:none;">
             <button class="btn-kai btn-blue sm" style="margin-bottom:10px;" onclick="addWriteItem()">+ 新增寫詞題目</button>
             <div id="writeEditorList"></div>
           </div>
 
-          <!-- 底部工具列：重置、匯出、匯入、儲存 -->
           <div style="display:flex; justify-content:space-between; align-items:center; margin-top:16px; padding-top:12px; border-top:2px solid #e2e8f0; flex-wrap:wrap; gap:8px;">
             <div style="display:flex; gap:8px;">
               <button class="btn-kai btn-gray sm" onclick="resetDefaultBank()">🔄 重置預設題庫</button>
@@ -449,7 +446,7 @@
           </table>
         </div>
 
-        <!-- 頁籤 4：發布題目 (含鎖定控制核取方塊) -->
+        <!-- 頁籤 4：發布題目 -->
         <div id="adminTab4" style="display:none;">
           <div style="background:#f7fafc; padding:14px; border-radius:12px; border:1px solid #e2e8f0; margin-bottom:12px;">
             <h4 style="margin:0 0 8px 0;">1. 選擇發布題庫與模式：</h4>
@@ -485,7 +482,6 @@
   <script>
     const GAS_API_URL = "https://script.google.com/macros/s/AKfycbyHU8-XjwlEw_Kg1y55hKm_ybMop9-nVS3n9q1OcDPoaonfG8n1EfmUZB_w_2ZQv0VFrA/exec";
 
-    // 預設題庫模板 (符合截圖格式)
     const DEFAULT_TASK_DATA = {
       chars: [
         { char: "陽", zhuyin: "ㄧㄤˊ" },
@@ -522,12 +518,14 @@
     let DB = JSON.parse(JSON.stringify(DEFAULT_TASK_DATA));
     let currentStudent = null;
     let currentUser = null;
+    let currentBankName = "預設題庫";
     let currentMode = 1, currentQIdx = 0;
     let activeModes = ['card', 'trace', 'choice', 'write'];
     let answeredState = { 1: {}, 2: {}, 3: {}, 4: {} };
+    let drawingsState = { 2: {}, 4: {} }; // 儲存學生手寫筆跡圖片 Base64
     let adminData = { banks: [], students: [], teachers: [], assigns: [] };
     let isDrawing = false;
-    let currentSubTab = 2; // 預設選字題庫
+    let currentSubTab = 2;
 
     function openModal(id) { document.getElementById(id).style.display = 'flex'; }
     function closeModal(id) { document.getElementById(id).style.display = 'none'; }
@@ -552,7 +550,7 @@
         .catch(err => { if (callback) callback({ status: 'error', message: err }); });
     }
 
-    /* 需求 1：直式注音渲染解析器 (含韻母右上角聲調定位) */
+    /* 直式注音解析與渲染 */
     function parseZhuyin(zyStr) {
       if (!zyStr) return { symbols: [], tone: '', toneType: 'none' };
       let tone = '';
@@ -620,6 +618,7 @@
       jsonpFetch(GAS_API_URL, { action: 'studentLogin', password: pwd }, function(res) {
         if (res.status === 'success') {
           currentStudent = res.student;
+          currentBankName = res.bankName || "派發題庫";
           document.getElementById('studentBadge').innerText = `${currentStudent.className} - ${currentStudent.name}`;
           if (res.taskData && Object.keys(res.taskData).length > 0) DB = res.taskData;
           if (res.assignModes) activeModes = res.assignModes;
@@ -725,8 +724,35 @@
       alert(`💡 提示答案：國字【${item.answerChar}】 注音【${item.answerZhuyin}】`);
     }
 
+    /* 完成此題：捕捉畫布筆跡圖檔 */
     function markAnswered() {
       answeredState[currentMode][currentQIdx] = true;
+
+      // 若為手寫模式 (2 或 4)，保存筆跡圖片 Base64
+      if (currentMode === 2) {
+        const canvas = document.getElementById('traceCanvas');
+        if (canvas) {
+          const item = DB.chars[currentQIdx];
+          drawingsState[2][currentQIdx] = {
+            base64: canvas.toDataURL('image/png'),
+            targetChar: item ? item.char : '',
+            modeName: '習寫',
+            qIndex: currentQIdx
+          };
+        }
+      } else if (currentMode === 4) {
+        const canvas = document.getElementById('writeCanvas');
+        if (canvas) {
+          const item = DB.write[currentQIdx];
+          drawingsState[4][currentQIdx] = {
+            base64: canvas.toDataURL('image/png'),
+            targetChar: item ? item.answerChar : '',
+            modeName: '寫詞',
+            qIndex: currentQIdx
+          };
+        }
+      }
+
       renderQ();
     }
 
@@ -747,6 +773,7 @@
       if (currentQIdx < list.length - 1) { currentQIdx++; renderQ(); }
     }
 
+    /* 全部作答完畢：自動打包上傳手寫練習圖檔並寫入試算表 */
     function checkAndSubmitAll() {
       if (!currentStudent) return alert("請先登入！");
 
@@ -765,12 +792,31 @@
         if (!confirm("尚有題目未完成，確定要繳交嗎？")) return;
       }
 
-      document.getElementById('lockOverlayTitle').innerText = "🎉 你真棒！";
-      document.getElementById('lockOverlayTitle').style.color = "#38b2ac";
-      document.getElementById('lockOverlayMsg').innerText = "作業已全部完成，請等待老師確認。";
+      // 彙整所有已書寫的畫布圖檔
+      const allDrawings = [];
+      [2, 4].forEach(m => {
+        Object.keys(drawingsState[m]).forEach(qIdx => {
+          allDrawings.push(drawingsState[m][qIdx]);
+        });
+      });
+
+      document.getElementById('lockOverlayTitle').innerText = "⏳ 作業上傳中...";
+      document.getElementById('lockOverlayTitle').style.color = "#3182ce";
+      document.getElementById('lockOverlayMsg').innerText = "正在儲存您的手寫筆跡圖檔，請稍候...";
       document.getElementById('lockedOverlay').style.display = 'flex';
 
-      postAPI({ action: 'lockStudentSelf', studentId: currentStudent.id });
+      postAPI({
+        action: 'submitDrawingsAndLock',
+        studentId: currentStudent.id,
+        studentName: currentStudent.name,
+        className: currentStudent.className,
+        bankName: currentBankName,
+        drawings: allDrawings
+      }, (res) => {
+        document.getElementById('lockOverlayTitle').innerText = "🎉 你真棒！";
+        document.getElementById('lockOverlayTitle').style.color = "#38b2ac";
+        document.getElementById('lockOverlayMsg').innerText = "作業已全部完成，手寫練習圖檔已成功繳交至教師試算表！";
+      });
     }
 
     /* 手寫板 Canvas 繪圖功能 */
@@ -783,6 +829,8 @@
         canvas.height = rect.height;
 
         const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height); // 白色背景便於試算表查看
         ctx.strokeStyle = '#2c3e50';
         ctx.lineWidth = 5;
         ctx.lineCap = 'round';
@@ -815,7 +863,8 @@
       const canvas = document.getElementById(canvasId);
       if (canvas) {
         const ctx = canvas.getContext('2d');
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
       }
     }
 
@@ -880,7 +929,6 @@
       DB.chars = DB.chars || [];
       DB.choice = DB.choice || [];
       DB.write = DB.write || [];
-      // 容錯舊格式轉為包含多字注音單元格式
       DB.choice.forEach(ch => {
         if (!ch.prefixUnits && ch.prefix) ch.prefixUnits = [{ char: ch.prefix, zhuyin: "" }];
         if (!ch.suffixUnits && ch.suffix) ch.suffixUnits = [{ char: ch.suffix, zhuyin: "" }];
@@ -923,7 +971,6 @@
       }
     }
 
-    /* 需求 2：JSON 本機匯出與匯入 */
     function exportBankJSON() {
       const currentName = document.getElementById('editingBankName').value.trim() || '題庫';
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(DB, null, 2));
@@ -969,7 +1016,6 @@
       }
     }
 
-    /* 需求 5：鍵盤快速鍵支援 (Enter 新增題目) */
     function handleEditorKeydown(e, type) {
       if (e.key === 'Enter') {
         e.preventDefault();
@@ -979,7 +1025,6 @@
       }
     }
 
-    /* 需求 1：圖形化題庫編輯器渲染 (完美對齊截圖樣式) */
     function renderEditorTables() {
       normalizeDBData();
 
@@ -994,7 +1039,7 @@
         </tr>`;
       });
 
-      // 2. 選字題庫 (對齊圖 1 樣式)
+      // 2. 選字題庫
       const cList = document.getElementById('choiceEditorList');
       cList.innerHTML = '';
       (DB.choice || []).forEach((ch, idx) => {
@@ -1191,7 +1236,6 @@
       });
     }
 
-    /* 需求 6：發布題目選單與鎖定控制 */
     function renderAssignStudentCheckboxes() {
       const bSel = document.getElementById('assignBankSelect');
       bSel.innerHTML = (adminData.banks || []).map(b => `<option value="${b.name}">${b.name}</option>`).join('');
@@ -1231,7 +1275,7 @@
         bankName: bankName,
         studentIds: selectedStudentIds,
         modes: modes,
-        unlockStudents: !onlyAssignKeepLock // 勾選時不解除鎖定，未勾選時自動解鎖
+        unlockStudents: !onlyAssignKeepLock
       }, () => {
         alert(onlyAssignKeepLock ? "題目發布成功！已保留學生鎖定狀態。" : "題目發布成功！已自動解除選取學生之鎖定。");
         loadBackendData();
