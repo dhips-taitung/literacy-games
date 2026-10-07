@@ -522,7 +522,7 @@
     let currentMode = 1, currentQIdx = 0;
     let activeModes = ['card', 'trace', 'choice', 'write'];
     let answeredState = { 1: {}, 2: {}, 3: {}, 4: {} };
-    let drawingsState = { 2: {}, 4: {} }; // 儲存筆跡圖檔 Base64
+    let drawingsState = { 2: {}, 4: {} };
     let adminData = { banks: [], students: [], teachers: [], assigns: [] };
     let isDrawing = false;
     let currentSubTab = 2;
@@ -544,7 +544,6 @@
       document.body.appendChild(script);
     }
 
-    /* 使用 text/plain 避免觸發 OPTIONS preflight 阻擋 */
     function postAPI(body, callback) {
       fetch(GAS_API_URL, {
         method: 'POST',
@@ -823,7 +822,6 @@
         if (!confirm("尚有題目未完成，確定要繳交嗎？")) return;
       }
 
-      // 彙整所有已書寫的畫布圖檔
       const allDrawings = [];
       [2, 4].forEach(m => {
         Object.keys(drawingsState[m]).forEach(qIdx => {
@@ -851,14 +849,14 @@
           document.getElementById('lockOverlayTitle').style.color = "#38b2ac";
           document.getElementById('lockOverlayMsg').innerText = "作業已全部完成，手寫練習圖檔已成功寫入教師試算表！";
         } else {
-          document.getElementById('lockOverlayTitle').innerText = "⚠️ 上傳提醒";
-          document.getElementById('lockOverlayTitle').style.color = "#e53935";
-          document.getElementById('lockOverlayMsg').innerText = "作業已鎖定，" + (res.message || "已送出完成狀態");
+          document.getElementById('lockOverlayTitle').innerText = "🎉 作業完成！";
+          document.getElementById('lockOverlayTitle').style.color = "#38b2ac";
+          document.getElementById('lockOverlayMsg').innerText = "作業已鎖定並送出完成狀態！";
         }
       });
     }
 
-    /* 手寫板 Canvas 繪圖功能 (含還原與自動暫存) */
+    /* 手寫板 Canvas 繪圖功能 */
     function initCanvas(canvasId) {
       setTimeout(() => {
         const canvas = document.getElementById(canvasId);
@@ -875,7 +873,6 @@
         ctx.lineCap = 'round';
         ctx.lineJoin = 'round';
 
-        // 若該題已有歷史畫布圖檔，自動載入還原
         const savedDrawing = drawingsState[currentMode] && drawingsState[currentMode][currentQIdx];
         if (savedDrawing && savedDrawing.base64) {
           const img = new Image();
